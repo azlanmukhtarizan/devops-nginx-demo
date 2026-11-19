@@ -1,0 +1,35 @@
+---
+- name: Configure local Linux host
+  hosts: webservers
+  become: true
+
+  tasks:
+    - name: Install Nginx
+      ansible.builtin.dnf:
+        name: nginx
+        state: present
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+      become: true
+
+    - name: Create DevOps user
+      ansible.builtin.user:
+        name: devops
+        shell: /bin/bash
+        create_home: true
+
+    - name: Deploy demo web page
+      ansible.builtin.copy:
+        content: |
+          <h1>DevOps Git and Ansible Demo</h1>
+          <p>Deployed locally using Ansible.</p>
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Ensure Nginx is running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
